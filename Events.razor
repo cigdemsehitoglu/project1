@@ -1,0 +1,49 @@
+@page "/events"
+@inject EventEase.Services.EventService EventService
+
+<PageTitle>Events - EventEase</PageTitle>
+
+<h1>Upcoming Events</h1>
+
+@if (events == null)
+{
+    <p>Loading events...</p>
+}
+else if (!events.Any())
+{
+    <p>No events found.</p>
+}
+else
+{
+    <div class="events-grid">
+        @foreach (var ev in events)
+        {
+            <EventCard Event="ev" OnRegister="HandleRegister" />
+        }
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(feedback))
+{
+    <p class="success">@feedback</p>
+}
+
+@code {
+    private List<EventEase.Services.EventModel>? events;
+    private string feedback = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        // Load events - demonstrates data fetching
+        events = EventService.GetAllEvents();
+    }
+
+    private void HandleRegister(int eventId)
+    {
+        var success = EventService.RegisterAttendee(eventId);
+        feedback = success
+            ? "You have been registered for the event!"
+            : "Registration failed. The event might be full.";
+        events = EventService.GetAllEvents();
+    }
+}

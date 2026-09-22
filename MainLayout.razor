@@ -1,0 +1,23 @@
+@inherits LayoutComponentBase
+
+<div class="page">
+    <header class="header">
+        <div class="container">
+            <a href="/" class="logo">EventEase</a>
+            <nav>
+                <NavLink href="/" Match="NavLinkMatch.All">Home</NavLink>
+                <NavLink href="/events">Events</NavLink>
+                <NavLink href="/register">Register</NavLink>
+                <NavLink href="/attendance">Attendance</NavLink>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        @Body
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 EventEase - Built with Blazor & Microsoft Copilot</p>
+    </footer>
+</div>

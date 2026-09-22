@@ -1,0 +1,75 @@
+@inject EventEase.Services.EventService EventService
+@inject EventEase.Services.UserSessionService SessionService
+
+<div class="attendance-tracker">
+    <h2>Attendance Tracker</h2>
+
+    @if (!SessionService.IsLoggedIn)
+    {
+        <p class="warning">Please register first to track attendance.</p>
+    }
+    else
+    {
+        <p>Logged in as: <strong>@SessionService.CurrentUserName</strong></p>
+
+        <table class="attendance-table">
+            <thead>
+                <tr>
+                    <th>Event</th>
+                    <th>Date</th>
+                    <th>Attendees</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var ev in events)
+                {
+                    <tr>
+                        <td>@ev.Title</td>
+                        <td>@ev.Date.ToString("dd MMM yyyy")</td>
+                        <td>@ev.AttendeeCount / @ev.Capacity</td>
+                        <td>@(ev.IsFull ? "Full" : "Open")</td>
+                        <td>
+                            <button class="btn btn-small" disabled="@ev.IsFull"
+                                    @onclick="() => Register(ev.Id)">
+                                @(ev.IsFull ? "Full" : "Join")
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        @if (!string.IsNullOrEmpty(message))
+        {
+            <p class="@(isSuccess ? "success" : "error")">@message</p>
+        }
+    }
+</div>
+
+@code {
+    private List<EventEase.Services.EventModel> events = new();
+    private string message = string.Empty;
+    private bool isSuccess;
+
+    protected override void OnInitialized()
+    {
+        events = EventService.GetAllEvents();
+        SessionService.OnChange += StateHasChanged;
+    }
+
+    private void Register(int eventId)
+    {
+        isSuccess = EventService.RegisterAttendee(eventId);
+        message = isSuccess
+            ? "Successfully registered for the event!"
+            : "Could not register. Event may be full.";
+        events = EventService.GetAllEvents();
+    }
+
+    public void Dispose()
+    {
+        SessionService.OnChange -= StateHasChanged;
+    }
+}

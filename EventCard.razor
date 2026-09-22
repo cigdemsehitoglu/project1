@@ -1,0 +1,42 @@
+@* Event Card Component with two-way data binding *@
+
+<div class="event-card @(Event.IsFull ? "full" : "")">
+    <h3>@Event.Title</h3>
+    <p class="description">@Event.Description</p>
+    
+    <div class="event-details">
+        <p><strong>Date:</strong> @Event.Date.ToString("dd MMM yyyy HH:mm")</p>
+        <p><strong>Location:</strong> @Event.Location</p>
+        <p><strong>Capacity:</strong> @Event.AttendeeCount / @Event.Capacity</p>
+    </div>
+
+    @* Two-way data binding example on notes field *@
+    <div class="notes-section">
+        <label for="notes-@Event.Id">Your Notes:</label>
+        <InputText id="notes-@Event.Id" @bind-Value="Notes" placeholder="Add a personal note..." />
+        <p class="notes-preview">Current note: @(string.IsNullOrEmpty(Notes) ? "(empty)" : Notes)</p>
+    </div>
+
+    <button class="btn" disabled="@Event.IsFull" @onclick="OnRegisterClicked">
+        @(Event.IsFull ? "Event Full" : "Register")
+    </button>
+</div>
+
+@code {
+    [Parameter]
+    public EventEase.Services.EventModel Event { get; set; } = new();
+
+    [Parameter]
+    public EventCallback<int> OnRegister { get; set; }
+
+    // Two-way bound property
+    private string Notes { get; set; } = string.Empty;
+
+    private async Task OnRegisterClicked()
+    {
+        if (!Event.IsFull)
+        {
+            await OnRegister.InvokeAsync(Event.Id);
+        }
+    }
+}
